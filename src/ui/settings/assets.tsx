@@ -1,23 +1,24 @@
-import { FlatList, ScrollView, View, Image } from 'react-native';
+import { Image, ScrollView, View, type GestureResponderEvent, type NativeTouchEvent } from 'react-native';
 import { memo, PureComponent, useMemo, useState } from 'react';
-import type { Asset as AssetType } from '@typings/api/assets';
+import type { AssetProps } from '@typings/ui/settings/assets';
+import { Discord, FlashList } from '@api/metro/components';
 import { GeneralSearch } from '@ui/misc/search';
-import { Discord } from '@api/metro/components';
 import { Media } from '@api/metro/components';
-import { Section } from '@ui/misc/forms';
 import { findByProps } from '@api/metro';
 import { assets } from '@api/assets';
+
+import useStyles from './assets.style';
 
 
 const AssetHandler = findByProps('getAssetUriForEmbed', { lazy: true });
 
-class Asset extends PureComponent<{ item: AssetType; id: number; index: number; total: number; }> {
+class Asset extends PureComponent<AssetProps> {
 	render() {
 		const { item, index, total, id } = this.props;
 
 		return <Discord.TableRow
 			label={item.name}
-			subLabel={`${item.type.toUpperCase()} - ${item.width}x${item.height} - ${id}`}
+			subLabel={`${item.type.toUpperCase()} · ${item.width}x${item.height} · ${id}`}
 			trailing={<Image
 				source={id}
 				style={{
@@ -25,13 +26,13 @@ class Asset extends PureComponent<{ item: AssetType; id: number; index: number; 
 					height: 24
 				}}
 			/>}
-			onPress={({ nativeEvent }) => this.open(AssetHandler.getAssetUriForEmbed(id), nativeEvent)}
+			onPress={({ nativeEvent }: GestureResponderEvent) => this.open(AssetHandler.getAssetUriForEmbed(id), nativeEvent)}
 			start={index === 0}
 			end={index === total - 1}
 		/>;
 	}
 
-	open(uri: string, event) {
+	open(uri: string, event: NativeTouchEvent) {
 		Image.getSize(uri, (width, height) => {
 			Media.openMediaModal({
 				originLayout: {
@@ -57,6 +58,7 @@ class Asset extends PureComponent<{ item: AssetType; id: number; index: number; 
 
 const Assets = memo(() => {
 	const [search, setSearch] = useState('');
+	const styles = useStyles();
 
 	const payload = useMemo(() => [...assets.entries()].filter(([, a]) => a.type === 'png'), [assets.size]);
 
@@ -66,31 +68,31 @@ const Assets = memo(() => {
 		return payload.filter((([, asset]) => asset.name.toLowerCase().includes(search.toLowerCase())));
 	}, [search]);
 
-	return <ScrollView key='unbound-assets'>
-		<View style={{ marginHorizontal: 16, marginVertical: 12 }}>
-			<GeneralSearch
-				type='assets'
-				search={search}
-				setSearch={setSearch}
-			/>
-		</View>
-		<Section style={{ flex: 1, marginBottom: 108 }} margin={false}>
-			<FlatList
-				keyExtractor={(_, idx) => idx.toString()}
-				data={data}
-				scrollEnabled={false}
-				initialNumToRender={15}
-				ItemSeparatorComponent={Discord.TableRowDivider}
-				removeClippedSubviews
-				renderItem={({ item: [id, asset], index }) => <Asset
-					id={id}
-					item={asset}
-					index={index}
-					total={data.length}
-				/>}
-			/>
-		</Section>
-	</ScrollView>;
+	return <View style={styles.container}>
+		<GeneralSearch
+			type='assets'
+			search={search}
+			setSearch={setSearch}
+		/>
+
+		<FlashList.FlashList
+			data={data}
+			keyExtractor={(_, idx) => idx.toString()}
+			ItemSeparatorComponent={Discord.TableRowDivider}
+			estimatedItemSize={60}
+			removeClippedSubviews
+			renderScrollComponent={({ children, ...props }) => <ScrollView {...props}>
+				{children}
+				<View style={styles.listEnd} />
+			</ScrollView>}
+			renderItem={({ item: [id, asset], index }) => <Asset
+				id={id}
+				item={asset}
+				index={index}
+				total={data.length}
+			/>}
+		/>
+	</View>;
 });
 
 export default Assets;

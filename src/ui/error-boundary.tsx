@@ -1,10 +1,9 @@
-import { View, Text, Image, SafeAreaView, Dimensions } from 'react-native';
+import { View, SafeAreaView, Image, Dimensions } from 'react-native';
 import { Icons, getIDByName } from '@api/assets';
 import { useSettingsStore } from '@api/storage';
 import { Discord } from '@api/metro/components';
 import { Clipboard } from '@api/metro/common';
 import { TintedIcon } from '@ui/misc/forms';
-import { CLIENT_NAME } from '@constants';
 import { reload } from '@api/native';
 import { CodeBlock } from '@ui/misc';
 import { Strings } from '@api/i18n';
@@ -19,53 +18,43 @@ interface ErrorBoundaryProps {
 	res: any;
 };
 
-interface CardProps {
-	style?: Record<string, any>,
-	children: any;
+interface CardProps extends React.ComponentProps<typeof View> {
+	containerStyle?: React.ComponentProps<typeof View>['style'];
 };
 
-const Card = ({ style, ...props }: CardProps) => {
+const Card = ({ style, children, containerStyle, ...props }: CardProps) => {
 	const styles = useStyles();
 
-	return <View style={[styles.cardShadow, style]}>
-		<View
-			style={[styles.card, style]}
-			{...props}
-		/>
+	return <View {...props} style={[styles.card, styles.cardShadow, style]}>
+		<View style={[styles.cardContainer, containerStyle]}>
+			{children}
+		</View>
 	</View>;
 };
 
-const Header = ({ res }: Pick<ErrorBoundaryProps, 'res'>) => {
+const Header = () => {
 	const styles = useStyles();
 
-	return <Card>
-		<View style={{ flexDirection: 'column' }}>
-			<Text style={styles.headerTitle}>
-				{res.props?.title?.replace('Discord', CLIENT_NAME)}
-			</Text>
-			<Text style={styles.headerBody}>
-				{res.props.body}
-			</Text>
-		</View>
-
-		<Image
-			source={{ uri: 'https://raw.githubusercontent.com/unbound-mod/assets/main/logo/logo.png' }}
-			style={[styles.headerChainIcon, {
-				transform: [
-					{ rotateZ: '20deg' },
-					{ scale: 1.4 }
-				],
-				opacity: 0.3,
-			}]}
-			blurRadius={6}
-			defaultSource={Icons['MoreHorizontalIcon']}
-		/>
-
+	return <Card containerStyle={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
 		<Image
 			source={{ uri: 'https://raw.githubusercontent.com/unbound-mod/assets/main/logo/logo.png' }}
 			style={styles.headerChainIcon}
 			defaultSource={Icons['MoreHorizontalIcon']}
 		/>
+		{/* <Image
+				source={{ uri: 'https://raw.githubusercontent.com/unbound-mod/assets/main/logo/logo.png' }}
+				blurRadius={6}
+				defaultSource={Icons['MoreHorizontalIcon']}
+				style={[styles.headerChainIcon, styles.headerChainGhostIcon]}
+			/> */}
+		<View style={styles.headerContainer}>
+			<Discord.Text variant='heading-md/bold'>
+				{Strings.UNBOUND_CRASH_REPORT_TITLE}
+			</Discord.Text>
+			<Discord.Text variant='text-sm/semibold'>
+				{Strings.UNBOUND_CRASH_REPORT_SUBTITLE}
+			</Discord.Text>
+		</View>
 	</Card>;
 };
 
@@ -75,18 +64,14 @@ const Outline = ({ state, error }: any) => {
 	let loadingTimeout: Timer;
 	const [loading, setLoading] = useState(false);
 
-	return <Card style={{ flexGrow: 1 }}>
-		<Text style={styles.outlineTitle}>
-			{Strings.UNBOUND_ERROR_BOUNDARY_OUTLINE_TITLE}
-		</Text>
-
-		<View style={{ flexGrow: 1 }}>
+	return <Card style={styles.outlineCard}>
+		<View style={{ flex: 1 }}>
 			<Discord.SegmentedControlPages state={state} />
-
 			<View style={{
 				position: 'absolute',
 				bottom: 20,
-				right: 20
+				right: 20,
+				zIndex: 1
 			}}>
 				<Discord.IconButton
 					icon={getIDByName('ic_message_copy')}
@@ -104,8 +89,7 @@ const Outline = ({ state, error }: any) => {
 				/>
 			</View>
 		</View>
-
-		<View style={{ margin: 10, marginTop: 0 }}>
+		<View style={styles.outlineSegmentedControl}>
 			<Discord.SegmentedControl state={state} variant={'experimental_Large'} />
 		</View>
 	</Card>;
@@ -113,9 +97,10 @@ const Outline = ({ state, error }: any) => {
 
 const Actions = ({ retryRender }: Pick<ErrorBoundaryProps, 'retryRender'>) => {
 	const settings = useSettingsStore('unbound');
+	const styles = useStyles();
 
-	return <Card style={{ marginBottom: 0 }}>
-		<View style={{ flexDirection: 'row', margin: 10 }}>
+	return <Card style={styles.actionsCard}>
+		<View style={styles.actionsContainer}>
 			<View style={!settings.get('recovery', false) ? { flex: 0.5, marginRight: 10 } : { flex: 1 }}>
 				<Discord.Button
 					onPress={retryRender}
@@ -177,12 +162,12 @@ export default function ErrorBoundary({ error, retryRender, res }: ErrorBoundary
 				)
 			};
 		}),
-		pageWidth: Dimensions.get('window').width - 40,
+		pageWidth: Dimensions.get('window').width - 64,
 		onPageChange: setIndex
 	});
 
 	return <SafeAreaView style={styles.container}>
-		<Header res={res} />
+		<Header />
 		<Outline state={state} error={possibleErrors[index].error} />
 		<Actions retryRender={retryRender} />
 	</SafeAreaView>;

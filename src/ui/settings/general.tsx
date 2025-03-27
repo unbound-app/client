@@ -1,9 +1,8 @@
-import { DISCORD_INVITE, SettingsKeys, SocialLinks } from '@constants';
-import { KeyboardAvoidingView, ScrollView, Text } from 'react-native';
+import { DISCORD_INVITE, Screens, SocialLinks } from '@constants';
+import { KeyboardAvoidingView, ScrollView } from 'react-native';
 import { BundleInfo, reload } from '@api/native';
 import { useSettingsStore } from '@api/storage';
 import { Discord } from '@api/metro/components';
-import { Theme } from '@api/metro/common';
 import { showDialog } from '@api/dialogs';
 import { Section } from '@ui/misc/forms';
 import { Linking } from '@api/metro/api';
@@ -13,20 +12,10 @@ import { Strings } from '@api/i18n';
 import Assets from '@api/assets';
 import { useMemo } from 'react';
 
-import Developer from '../developer';
-import Toasts from './toasts';
+import useStyles from './general.style';
 
 
 const { TableRow, TableSwitchRow, TableRowIcon } = Discord;
-
-const useStyles = Discord.createStyles({
-	trailingText: {
-		color: Theme.colors.TEXT_MUTED
-	},
-	container: {
-		marginBottom: 50
-	}
-});
 
 function General() {
 	const properties = useMemo(() => (HermesInternal as any).getRuntimeProperties(), []);
@@ -36,9 +25,9 @@ function General() {
 
 	const Icons = {
 		GitHub: Assets.getIDByName('img_account_sync_github_white'),
-		Development: Assets.getIDByName('ic_progress_wrench_24px'),
+		Development: Assets.getIDByName('WrenchIcon'),
 		Toasts: Assets.getIDByName('ic_notification_settings'),
-		Trash: Assets.getIDByName('trash'),
+		Trash: Assets.getIDByName('TrashIcon'),
 		Shield: Assets.getIDByName('ShieldIcon'),
 		Refresh: Assets.getIDByName('RefreshIcon'),
 		Discord: Assets.getIDByName('logo'),
@@ -48,11 +37,10 @@ function General() {
 
 	return <ScrollView>
 		<KeyboardAvoidingView
-			enabled={true}
 			behavior='position'
 			style={styles.container}
 			keyboardVerticalOffset={100}
-			contentContainerStyle={{ backfaceVisibility: 'hidden' }}
+			contentContainerStyle={styles.contentContainer}
 		>
 			<Section>
 				<TableSwitchRow
@@ -98,19 +86,13 @@ function General() {
 				<TableRow
 					label={Strings.UNBOUND_TOAST_SETTINGS}
 					icon={<TableRowIcon source={Icons.Toasts} />}
-					onPress={() => navigation.push(SettingsKeys.Custom, {
-						title: Strings.UNBOUND_TOAST_SETTINGS,
-						render: Toasts
-					})}
+					onPress={() => navigation.push(Screens.Toasts)}
 					arrow
 				/>
 				<TableRow
 					label={Strings.UNBOUND_DEVELOPER_SETTINGS}
 					icon={<TableRowIcon source={Icons.Development} />}
-					onPress={() => navigation.push(SettingsKeys.Custom, {
-						title: Strings.UNBOUND_DEVELOPER_SETTINGS,
-						render: Developer
-					})}
+					onPress={() => navigation.push(Screens.Developer)}
 					arrow
 				/>
 			</Section>
@@ -123,7 +105,7 @@ function General() {
 					onValueChange={() => settings.toggle('staff-mode', false)}
 				/>
 			</Section>
-			<Section title='Links'>
+			<Section title={Strings.UNBOUND_LINKS}>
 				<TableRow
 					label={Strings.UNBOUND_DISCORD_SERVER}
 					icon={<TableRowIcon source={Icons.Discord} />}
@@ -142,23 +124,23 @@ function General() {
 					label={Strings.UNBOUND_UNBOUND_VERSION}
 					onPress={() => Linking.openURL(`https://github.com/unbound-mod/client/commit/${window.unbound.version}`)}
 					icon={<TableRowIcon IconComponent={Unbound} />}
-					trailing={<Text style={styles.trailingText}>
+					trailing={<Discord.Text color='text-muted'>
 						{window.unbound.version}
-					</Text>}
+					</Discord.Text>}
 				/>
 				<TableRow
 					label={Strings.UNBOUND_DISCORD_VERSION}
 					icon={<TableRowIcon source={Icons.Discord} />}
-					trailing={<Text style={styles.trailingText}>
+					trailing={<Discord.Text color='text-muted'>
 						{BundleInfo.Version}
-					</Text>}
+					</Discord.Text>}
 				/>
 				<TableRow
 					label={Strings.UNBOUND_BYTECODE_VERSION}
 					icon={<TableRowIcon source={Icons.Information} />}
-					trailing={<Text style={styles.trailingText}>
+					trailing={<Discord.Text color='text-muted'>
 						{properties['Bytecode Version']}
-					</Text>}
+					</Discord.Text>}
 				/>
 			</Section>
 		</KeyboardAvoidingView>

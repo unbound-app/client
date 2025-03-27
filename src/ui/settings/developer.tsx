@@ -1,14 +1,11 @@
 import { Section, useFormStyles } from '@ui/misc/forms';
-import { SettingsKeys, SocialLinks } from '@constants';
-import { ScrollView, View, Text } from 'react-native';
+import { Screens, SocialLinks } from '@constants';
 import { useSettingsStore } from '@api/storage';
+import { ScrollView, View } from 'react-native';
 import { Discord } from '@api/metro/components';
 import { Strings } from '@api/i18n';
 import Toasts from '@api/toasts';
 import Assets from '@api/assets';
-
-import AssetBrowser from './assets';
-import Logs from './logger';
 
 
 const {
@@ -21,11 +18,11 @@ const {
 export default function Developer() {
 	const navigation = Discord.useNavigation();
 	const settings = useSettingsStore('unbound');
-	const { endStyle, formText } = useFormStyles();
+	const { endStyle } = useFormStyles();
 
 	const Icons = {
-		Debug: Assets.getIDByName('debug'),
-		Browser: Assets.getIDByName('ImageTextIcon'),
+		AuditLog: Assets.getIDByName('ic_audit_log_24px'),
+		Assets: Assets.getIDByName('StarIcon'),
 		Trash: Assets.getIDByName('trash'),
 		Retry: Assets.getIDByName('RetryIcon')
 	};
@@ -91,8 +88,7 @@ export default function Developer() {
 			/>
 			<TableRow
 				label={Strings.UNBOUND_ERROR_BOUNDARY_TRIGGER_TITLE}
-				subLabel={Strings.UNBOUND_ERROR_BOUNDARY_TRIGGER_DESC}
-				onPress={() => navigation.push(SettingsKeys.Custom, {
+				onPress={() => navigation.push(undefined, {
 					title: null,
 
 					// @ts-expect-error -- purposefully trip the boundary by rendering undefined
@@ -105,9 +101,9 @@ export default function Developer() {
 			<TableRow
 				label={Strings.UNBOUND_LOGGING_DEPTH}
 				trailing={(
-					<Text style={formText}>
+					<Discord.Text variant='text-sm/normal' color='text-muted'>
 						{Strings.UNBOUND_LOGGING_DEPTH_DESC.format({ depth: settings.get('logging.depth', 2) })}
-					</Text>
+					</Discord.Text>
 				)}
 			/>
 			<View style={[endStyle, { borderBottomRightRadius: 0, borderBottomLeftRadius: 0 }]}>
@@ -122,11 +118,8 @@ export default function Developer() {
 			</View>
 			<TableRow
 				label={Strings.UNBOUND_DEBUG_LOGS}
-				icon={<TableRowIcon source={Icons.Debug} />}
-				onPress={() => navigation.push(SettingsKeys.Custom, {
-					title: Strings.UNBOUND_DEBUG_LOGS,
-					render: Logs
-				})}
+				icon={<TableRowIcon source={Icons.AuditLog} />}
+				onPress={() => navigation.push(Screens.Logs)}
 				arrow
 			/>
 		</Section>
@@ -146,11 +139,8 @@ export default function Developer() {
 			/>
 			<TableRow
 				label={Strings.UNBOUND_ASSET_BROWSER}
-				icon={<TableRowIcon source={Icons.Browser} />}
-				onPress={() => navigation.push(SettingsKeys.Custom, {
-					title: Strings.UNBOUND_ASSET_BROWSER,
-					render: AssetBrowser
-				})}
+				icon={<TableRowIcon source={Icons.Assets} />}
+				onPress={() => navigation.push(Screens.Assets)}
 				arrow
 			/>
 		</Section>

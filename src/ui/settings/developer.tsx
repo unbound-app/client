@@ -88,7 +88,7 @@ export default function Developer() {
 			/>
 			<TableRow
 				label={Strings.UNBOUND_ERROR_BOUNDARY_TRIGGER_TITLE}
-				onPress={() => navigation.push(undefined, {
+				onPress={() => navigation.push(Screens.Custom, {
 					title: null,
 
 					// @ts-expect-error -- purposefully trip the boundary by rendering undefined

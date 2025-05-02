@@ -55,7 +55,8 @@ export const Screens = {
 	Developer: 'UNBOUND_DEVELOPER',
 	Toasts: 'UNBOUND_TOASTS',
 	Logs: 'UNBOUND_LOGS',
-	Assets: 'UNBOUND_ASSETS'
+	Assets: 'UNBOUND_ASSETS',
+	Custom: 'UNBOUND_CUSTOM'
 } as const;
 
 export const Times = {

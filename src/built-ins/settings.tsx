@@ -9,6 +9,7 @@ import { Discord } from '@api/metro/components';
 import PluginsPage from '@ui/settings/plugins';
 import GeneralPage from '@ui/settings/general';
 import EventEmitter from '@structures/emitter';
+import CustomScreen from '@ui/settings/custom';
 import { Dispatcher } from '@api/metro/common';
 import ToastsPage from '@ui/settings/toasts';
 import DesignPage from '@ui/settings/design';
@@ -150,6 +151,19 @@ export const data: BuiltInData & {
 			screen: {
 				route: Screens.Assets,
 				getComponent: () => AssetsPage
+			}
+		},
+
+		[Screens.Custom]: {
+			type: 'route',
+			title: 'Page',
+			key: Screens.Custom,
+			excludeFromDisplay: true,
+			parent: null,
+			icon: null,
+			screen: {
+				route: Screens.Custom,
+				getComponent: () => CustomScreen
 			}
 		}
 	},
